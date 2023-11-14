@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import { User } from "./models.users.js";
 import { CONFIG } from "../../core/config.js";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 
 export const createUser = async (user) => {
   user.password = await bcrypt.hash(user.password, CONFIG.HASH_ROUNDS);
@@ -11,24 +10,24 @@ export const createUser = async (user) => {
   return user;
 };
 
-export const loginUser = async ({ email, password }) => {
+export const loginUser = async ({ email, password }, next) => {
   if (!email || !password) {
-    throw new Error("Incorrect Data");
+    throw new Error(next("INCOMPLETE_CREDENTIALS"));
   }
   const user = await User.findOne({ email }).select("+password");
   if (!user) {
-    throw new Error("User not found");
+    throw new Error(next("USER_NOT_FOUND"));
   }
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    throw new Error("Incorrect password");
+    throw new Error(next("INCORRECT_PASSWORD"));
   }
   const token = jwt.sign({ userId: user._id, role: user.role }, CONFIG.SECRET, {
     expiresIn: "24h",
   });
   return { token };
 };
-
+/*
 export const profileUser = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -52,4 +51,4 @@ export const profileUser = async (userId) => {
   } catch (error) {
     throw error;
   }
-};
+};*/

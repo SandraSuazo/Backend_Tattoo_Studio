@@ -1,9 +1,10 @@
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
+import { CONFIG } from "./core/config.js";
 import { userRouter } from "./entities/users/routers.user.js";
 import { auth } from "./middlewares/verify.token.js";
-import { CONFIG } from "./core/config.js";
-import mongoose from "mongoose";
+import { errorHandler } from "./middlewares/errors.js";
 
 const app = express();
 app.use(express.json());
@@ -12,9 +13,10 @@ app.use("/user", userRouter);
 app.use(auth);
 
 app.listen(CONFIG.PORT, () =>
-  console.log(`Servidor levantado en el puerto ${CONFIG.PORT}`)
+  console.log(`Server listening on port ${CONFIG.PORT}`)
 );
-
+app.use(errorHandler);
 mongoose
   .connect(CONFIG.DB_URL)
-  .then(() => console.log("Conectado a la base de datos"));
+  .then(() => console.log("Connected to the database"))
+  .catch(() => console.log("Failed to connect to the database:"));
