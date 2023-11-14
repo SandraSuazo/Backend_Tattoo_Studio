@@ -3,8 +3,8 @@ import {
   createUser,
   loginUser,
   //profileUser
-} from "./controllers.user.js";
-import { auth } from "../../middlewares/verify.token.js";
+} from "./controllers.js";
+import { auth } from "../../middlewares/auth.js";
 
 export const userRouter = express.Router();
 

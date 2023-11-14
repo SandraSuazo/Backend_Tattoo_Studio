@@ -2,8 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { CONFIG } from "./core/config.js";
-import { userRouter } from "./entities/users/routers.user.js";
-import { auth } from "./middlewares/verify.token.js";
+import { userRouter } from "./entities/users/routes.js";
+import { auth } from "./middlewares/auth.js";
 import { errorHandler } from "./middlewares/errors.js";
 
 const app = express();
