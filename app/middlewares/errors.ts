@@ -4,7 +4,7 @@ const errorMessages = {
   TOKEN_NOT_PROVIDED: { code: 401, message: "Token Not Provided" },
   ACCESS_DENIED: { code: 403, message: "Access Denied" },
   USER_NOT_FOUND: { code: 404, message: "User not found" },
-  USER_NOT_CREATED: { code: 422, message: "User not created correctly" },
+  USER_ALREADY_EXISTS: { code: 422, message: "User already exists" },
   INTERNAL_SERVER_ERROR: { code: 500, message: "Internal Server Error" },
 };
 

@@ -3,7 +3,7 @@ import { User } from "./model.js";
 import { CONFIG } from "../../core/config.js";
 import jwt from "jsonwebtoken";
 
-export const createUser = async (user) => {
+export const createUser = async (user, next) => {
   user.password = await bcrypt.hash(user.password, CONFIG.HASH_ROUNDS);
   user.role = user.role !== "" ? user.role : "customer";
   await User.create(user);
@@ -27,7 +27,7 @@ export const loginUser = async ({ email, password }, next) => {
   });
   return { token };
 };
-/*
+
 export const profileUser = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -41,14 +41,10 @@ export const profileUser = async (userId) => {
       address: user.address,
       phone: user.phone,
       email: user.email,
-      role: user.role,
-      isActive: user.isActive,
-      isBusy: user.isBusy,
       sessions: user.sessions,
     };
-
     return userProfile;
   } catch (error) {
     throw error;
   }
-};*/
+};

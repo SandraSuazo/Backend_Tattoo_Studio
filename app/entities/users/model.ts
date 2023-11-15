@@ -15,7 +15,6 @@ const userSchema = new Schema(
       required: false,
     },
     isActive: { type: Boolean, required: true },
-    isBusy: { type: Boolean, required: true },
     sessions: [
       {
         type: Schema.Types.ObjectId,
