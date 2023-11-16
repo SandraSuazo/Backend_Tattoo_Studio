@@ -6,6 +6,6 @@
       "strictNullChecks": true,
       "sourceMap": true,
       "moduleResolution": "node",
-      "outDir": "dist/app/"
+      "outDir": "dist/"
   }    
 }

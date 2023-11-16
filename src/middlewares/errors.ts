@@ -1,4 +1,5 @@
 const errorMessages = {
+  MISSING_REQUIRED_FIELDS: { code: 400, message: "Some fields are missing" },
   INCORRECT_PASSWORD: { code: 401, message: "Incorrect Password" },
   INCOMPLETE_CREDENTIALS: { code: 401, message: "Incomplete Credentials" },
   TOKEN_NOT_PROVIDED: { code: 401, message: "Token Not Provided" },
