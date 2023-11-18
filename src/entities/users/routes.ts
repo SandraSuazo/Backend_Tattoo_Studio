@@ -1,11 +1,16 @@
 import express from "express";
+import { auth } from "../../middlewares/auth.js";
+import { isActive } from "../../middlewares/isActive.js";
+import { isAdmin } from "../../middlewares/isAdmin.js";
 import {
   createUser,
   loginUser,
   profileUser,
   updateProfile,
+  changeRole,
+  deactivateUser,
+  listUsers,
 } from "./controllers.js";
-import { auth } from "../../middlewares/auth.js";
 
 export const userRouter = express.Router();
 
@@ -27,7 +32,7 @@ userRouter.post("/login", async (req, res, next) => {
   }
 });
 
-userRouter.get("/profile", auth, async (req, res, next) => {
+userRouter.get("/profile", auth, isActive, async (req, res, next) => {
   const userId = (req as any).user.userId;
   try {
     res.json(await profileUser(userId, next));
@@ -36,7 +41,7 @@ userRouter.get("/profile", auth, async (req, res, next) => {
   }
 });
 
-userRouter.patch("/change-profile", auth, async (req, res, next) => {
+userRouter.patch("/update-profile", auth, isActive, async (req, res, next) => {
   const userId = (req as any).user.userId;
   const updatedData = req.body;
   try {
@@ -45,3 +50,48 @@ userRouter.patch("/change-profile", auth, async (req, res, next) => {
     next("INTERNAL_SERVER_ERROR");
   }
 });
+
+userRouter.patch(
+  "/change-role/:userId",
+  auth,
+  isActive,
+  isAdmin,
+  async (req, res, next) => {
+    const userId = req.params.userId;
+    const newRole = req.body.newRole;
+    try {
+      res.json(await changeRole(userId, newRole, next));
+    } catch (error) {
+      next("INTERNAL_SERVER_ERROR");
+    }
+  }
+);
+
+userRouter.patch(
+  "/deactivate/:userId",
+  auth,
+  isActive,
+  async (req, res, next) => {
+    const userId = req.params.userId;
+    try {
+      res.json(await deactivateUser(userId, next));
+    } catch (error) {
+      next("INTERNAL_SERVER_ERROR");
+    }
+  }
+);
+
+userRouter.get(
+  "/list/:role",
+  auth,
+  isActive,
+  isAdmin,
+  async (req, res, next) => {
+    const role = req.params.role;
+    try {
+      res.json(await listUsers(role, next));
+    } catch (error) {
+      next("INTERNAL_SERVER_ERROR");
+    }
+  }
+);

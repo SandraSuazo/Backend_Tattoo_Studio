@@ -22,6 +22,7 @@ const sessionSchema = new Schema(
       unique: true,
     },
     invoice: { type: Number, required: false },
+    isActive: { type: Boolean, required: true },
   },
 
   { versionKey: false, timestamps: true }
