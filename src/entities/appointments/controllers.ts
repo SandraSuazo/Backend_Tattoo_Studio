@@ -64,6 +64,10 @@ export const deactivateSession = async (userId, role, sessionId, next) => {
 export const listSession = async (userId, next) => {
   const sessions = await Session.find({
     $or: [{ customer: userId }, { tattooArtist: userId }],
+    isActive: true,
   });
+  if (!sessions) {
+    throw new Error(next("NO_PENDING_SESSIONS"));
+  }
   return sessions;
 };

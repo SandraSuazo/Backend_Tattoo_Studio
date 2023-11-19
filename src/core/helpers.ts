@@ -25,6 +25,7 @@ export const validateRole = (role, next) => {
   if (!validRoles.includes(role)) {
     throw new Error(next("INVALID_ROLE"));
   }
+  return role;
 };
 
 /* Función para verificar y transformar el formato de la hora en las citas */

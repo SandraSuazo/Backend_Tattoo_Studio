@@ -17,6 +17,10 @@ export const createUser = async (newUser, next) => {
   if (user) {
     throw new Error(next("USER_ALREADY_EXISTS"));
   } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newUser.email)) {
+      throw new Error(next("INVALID_EMAIL_FORMAT"));
+    }
     const passwordRegex =
       /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     if (!passwordRegex.test(newUser.password)) {
@@ -63,36 +67,47 @@ export const profileUser = async (userId, next) => {
 
 export const updateProfile = async (userId, updatedData, next) => {
   const user = await getUserById(userId, next);
-  const modifiedFields = {};
-  for (const field of registrationFields) {
-    if (field === "password" && updatedData[field] !== undefined) {
-      updatedData[field] = await bcrypt.hash(
-        updatedData[field],
-        CONFIG.HASH_ROUNDS
-      );
-    } else if (updatedData[field] !== user[field]) {
-      user[field] = updatedData[field];
-      modifiedFields[field] = user[field];
+  let fieldModified = false;
+  const updatedUser = {};
+  for (const field in updatedData) {
+    if (!registrationFields.includes(field)) {
+      throw new Error(next("ACCESS_DENIED"));
     }
   }
-  if (Object.keys(modifiedFields).length === 0) {
+  registrationFields.forEach((field) => {
+    if (updatedData[field] !== undefined) {
+      user[field] = updatedData[field];
+      updatedUser[field] = user[field];
+      fieldModified = true;
+    }
+  });
+  if (updatedData["password"] !== undefined) {
+    const hashedPassword = await bcrypt.hash(
+      updatedData["password"],
+      CONFIG.HASH_ROUNDS
+    );
+    user.password = hashedPassword;
+    updatedUser["password"] = user.password;
+    fieldModified = true;
+  }
+  if (!fieldModified) {
     throw new Error(next("NO_FIELD_MODIFIED"));
   }
   await user.save();
-  return modifiedFields;
+  return updatedUser;
 };
 
 export const changeRole = async (userId, newRole, next) => {
   validateRole(newRole, next);
-  const user = await User.findByIdAndUpdate(userId, { role: newRole });
-  getUserById(user, next);
-  return `A new ${newRole} has been created`;
+  const user = await getUserById(userId, next);
+  user.role = newRole;
+  return user;
 };
 
 export const deactivateUser = async (userId, next) => {
-  getUserById(userId, next);
-  const user = await User.findByIdAndUpdate(userId, { isActive: false });
-  return `User with ID ${userId} has been deactivated.`;
+  const user = await getUserById(userId, next);
+  user.isActive = false;
+  return user;
 };
 
 export const listUsers = async (role, next) => {
