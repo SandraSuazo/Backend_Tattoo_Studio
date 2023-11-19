@@ -1,37 +1,69 @@
 import { Session } from "./model.js";
-import { getUserById, registrationDates } from "../../core/helpers.js";
+import { getUserById, formatTime, getSessionById } from "../../core/helpers.js";
 
-export const createDates = async (userId, newDate, next) => {
-  const missingFields = registrationDates.filter((field) => !newDate[field]);
-  if (missingFields.length > 1) {
+export const createSession = async (userId, newDate, next) => {
+  const user = await getUserById(userId, next);
+  let customerField = user.role === "customer" ? userId : newDate.customer;
+  let artistField =
+    user.role === "tattooArtist" ? userId : newDate.tattooArtist;
+  const formattedStartTime = formatTime(newDate.startTime, next);
+  const formattedEndTime = formatTime(newDate.endTime, next);
+  if (!formattedStartTime || !formattedEndTime) {
     throw new Error(next("MISSING_REQUIRED_FIELDS"));
   }
-  const user = await getUserById(userId, next);
-  user._id = newDate.customer;
-  console.log(user);
-  await Session.create(newDate);
-  return newDate;
-};
-
-/*
-export const updateProfile = async (userId, updatedData, next) => {
-  const user = await getUserById(userId, next);
-  const modifiedFields = {};
-
-  for (const field of registrationUsers) {
-    if (
-      updatedData[field] !== undefined &&
-      updatedData[field] !== user[field]
-    ) {
-      if (field === "password" && updatedData[field] !== user[field]) {
-        user[field] = await bcrypt.hash(updatedData[field], CONFIG.HASH_ROUNDS);
-      } else {
-        user[field] = updatedData[field];
-      }
-      modifiedFields[field] = user[field];
-    }
+  const existingSession = await Session.findOne({
+    date: newDate.date,
+    startTime: { $lte: newDate.endTime },
+    endTime: { $gte: newDate.startTime },
+  });
+  if (existingSession) {
+    throw new Error(next("BUSY_SESSION"));
   }
-  await user.save();
-  return modifiedFields;
+  const currentDate = new Date();
+  const selectedDate = new Date(newDate.date);
+  if (selectedDate < currentDate) {
+    throw new Error(next("INVALID_DATE"));
+  }
+  const session = new Session({
+    ...newDate,
+    startTime: formattedStartTime,
+    endTime: formattedEndTime,
+    customer: customerField,
+    tattooArtist: artistField,
+    isActive: true,
+  });
+  await session.save();
+  const fullSession = await Session.findById(session._id)
+    .populate("customer", "name surname phone")
+    .populate("tattooArtist", "name surname phone");
+  return fullSession;
 };
-*/
+
+export const findSession = async (sessionId, next) => {
+  const session = await getSessionById(sessionId, next);
+  session.populate("customer", "name surname phone");
+  session.populate("tattooArtist", "name surname phone");
+  return session;
+};
+
+export const updateSession = async (userId, sessionId, updatedData, next) => {};
+
+export const deactivateSession = async (userId, role, sessionId, next) => {
+  const session = await getSessionById(sessionId, next);
+  if (
+    (role === "customer" && session[role] !== userId) ||
+    (role === "tattooArtist" && session[role] !== userId)
+  ) {
+    throw new Error(next("ACCESS_DENIED"));
+  }
+  session.isActive = false;
+  await session.save();
+  return session;
+};
+
+export const listSession = async (userId, next) => {
+  const sessions = await Session.find({
+    $or: [{ customer: userId }, { tattooArtist: userId }],
+  });
+  return sessions;
+};

@@ -3,13 +3,13 @@ import jwt from "jsonwebtoken";
 import { User } from "./model.js";
 import { CONFIG } from "../../core/config.js";
 import {
-  registrationUsers,
+  registrationFields,
   getUserById,
   validateRole,
 } from "../../core/helpers.js";
 
 export const createUser = async (newUser, next) => {
-  const missingFields = registrationUsers.filter((field) => !newUser[field]);
+  const missingFields = registrationFields.filter((field) => !newUser[field]);
   if (missingFields.length > 0) {
     throw new Error(next("MISSING_REQUIRED_FIELDS"));
   }
@@ -55,7 +55,7 @@ export const loginUser = async ({ email, password }, next) => {
 export const profileUser = async (userId, next) => {
   const user = await getUserById(userId, next);
   const userProfile = {};
-  for (const field of registrationUsers) {
+  for (const field of registrationFields) {
     userProfile[field] = user[field];
   }
   return userProfile;
@@ -64,7 +64,7 @@ export const profileUser = async (userId, next) => {
 export const updateProfile = async (userId, updatedData, next) => {
   const user = await getUserById(userId, next);
   const modifiedFields = {};
-  for (const field of registrationUsers) {
+  for (const field of registrationFields) {
     if (field === "password" && updatedData[field] !== undefined) {
       updatedData[field] = await bcrypt.hash(
         updatedData[field],
@@ -90,8 +90,8 @@ export const changeRole = async (userId, newRole, next) => {
 };
 
 export const deactivateUser = async (userId, next) => {
+  getUserById(userId, next);
   const user = await User.findByIdAndUpdate(userId, { isActive: false });
-  getUserById(user, next);
   return `User with ID ${userId} has been deactivated.`;
 };
 
