@@ -57,25 +57,11 @@ export const findSession = async (sessionId, next) => {
 export const updateSession = async (userId, sessionId, updatedData, next) => {
   const user = await getUserById(userId, next);
   const session = await getSessionById(sessionId, next);
-  console.log(user.role);
-  if (
-    (user.role === "customer" && session.customer._id !== userId) ||
-    (user.role === "tattooArtist" && session.tattooArtist._id !== userId)
-  ) {
-    throw new Error(next("ACCESS_DENIED"));
-  }
-  if (user.role === "tattooArtist" && updatedData.customer) {
-    throw new Error(next("INCOMPLETE_CREDENTIALS"));
-  }
+  session.isActive = false;
+  await createSession(userId, updatedData, next);
   for (const field in updatedData) {
     if (!registrationSession.includes(field)) {
       throw new Error(next("ACCESS_DENIED"));
-    }
-    if (field === "customer" && user.role === "tattooArtist") {
-      throw new Error(next("INCOMPLETE_CREDENTIALS"));
-    }
-    if (field === "tattooArtist" && user.role === "customer") {
-      throw new Error(next("INCOMPLETE_CREDENTIALS"));
     }
     if (field === "startTime" || field === "endTime") {
       const formattedTime = formatTime(updatedData[field], next);
