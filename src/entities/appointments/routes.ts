@@ -18,7 +18,6 @@ sessionRouter.post("/", auth, isActive, async (req, res, next) => {
   try {
     res.json(await createSession(userId, newSession, next));
   } catch (error) {
-    console.log(error);
     next("INTERNAL_SERVER_ERROR");
   }
 });
@@ -33,7 +32,6 @@ sessionRouter.get(
     try {
       res.json(await findSession(sessionId, next));
     } catch (error) {
-      console.log(error);
       next("INTERNAL_SERVER_ERROR");
     }
   }

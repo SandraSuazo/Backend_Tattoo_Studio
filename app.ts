@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use("/user", userRouter);
-app.use("/appointment", sessionRouter);
+app.use("/session", sessionRouter);
 app.use(auth);
 
 app.listen(CONFIG.PORT, () =>

@@ -6,6 +6,8 @@ import {
   registrationFields,
   getUserById,
   validateRole,
+  validateEmail,
+  validatePassword,
 } from "../../core/helpers.js";
 
 export const createUser = async (newUser, next) => {
@@ -17,15 +19,8 @@ export const createUser = async (newUser, next) => {
   if (user) {
     throw new Error(next("USER_ALREADY_EXISTS"));
   } else {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newUser.email)) {
-      throw new Error(next("INVALID_EMAIL_FORMAT"));
-    }
-    const passwordRegex =
-      /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-    if (!passwordRegex.test(newUser.password)) {
-      throw new Error(next("INVALID_PASSWORD_FORMAT"));
-    }
+    validateEmail(newUser.email, next);
+    validatePassword(newUser.password, next);
     newUser.password = await bcrypt.hash(newUser.password, CONFIG.HASH_ROUNDS);
     newUser.role = "customer";
     newUser.isActive = true;
@@ -73,22 +68,23 @@ export const updateProfile = async (userId, updatedData, next) => {
     if (!registrationFields.includes(field)) {
       throw new Error(next("ACCESS_DENIED"));
     }
-  }
-  registrationFields.forEach((field) => {
-    if (updatedData[field] !== undefined) {
+    if (field === "email" && updatedData[field] !== undefined) {
+      validateEmail({ email: updatedData[field] }, next);
+    }
+    if (field === "password" && updatedData[field] !== undefined) {
+      validatePassword({ password: updatedData[field] }, next);
+      const hashedPassword = await bcrypt.hash(
+        updatedData["password"],
+        CONFIG.HASH_ROUNDS
+      );
+      user.password = hashedPassword;
+      updatedUser["password"] = user.password;
+      fieldModified = true;
+    } else if (updatedData[field] !== undefined) {
       user[field] = updatedData[field];
       updatedUser[field] = user[field];
       fieldModified = true;
     }
-  });
-  if (updatedData["password"] !== undefined) {
-    const hashedPassword = await bcrypt.hash(
-      updatedData["password"],
-      CONFIG.HASH_ROUNDS
-    );
-    user.password = hashedPassword;
-    updatedUser["password"] = user.password;
-    fieldModified = true;
   }
   if (!fieldModified) {
     throw new Error(next("NO_FIELD_MODIFIED"));
@@ -101,12 +97,14 @@ export const changeRole = async (userId, newRole, next) => {
   validateRole(newRole, next);
   const user = await getUserById(userId, next);
   user.role = newRole;
+  await user.save();
   return user;
 };
 
 export const deactivateUser = async (userId, next) => {
   const user = await getUserById(userId, next);
   user.isActive = false;
+  await user.save();
   return user;
 };
 
