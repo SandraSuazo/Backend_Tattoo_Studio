@@ -1,4 +1,4 @@
-# Proyecto Awesome
+# INK ADDICT STUDIO BACKEND
 
 Este proyecto, denominado **Ink Addict Studio**, es una aplicación increíble que gestiona sesiones y usuarios. A continuación, encontrarás información sobre los endpoints disponibles, los verbos HTTP asociados y las acciones correspondientes.
 
