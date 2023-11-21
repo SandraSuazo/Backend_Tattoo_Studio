@@ -1,6 +1,6 @@
 # INK ADDICT STUDIO BACKEND
 
-Este proyecto, denominado **Ink Addict Studio**, es una aplicación increíble que gestiona sesiones y usuarios. A continuación, encontrarás información sobre los endpoints disponibles, los verbos HTTP asociados y las acciones correspondientes.
+Este proyecto, denominado **Ink Addict Studio**, es una aplicación que gestiona sesiones y usuarios. A continuación, encontrarás información sobre los endpoints disponibles, los verbos HTTP asociados y las acciones correspondientes.
 
 ## Información del Proyecto
 
@@ -18,7 +18,7 @@ Este proyecto, denominado **Ink Addict Studio**, es una aplicación increíble q
 | `/sessions`                           | POST       | Crear nueva sesión                          | Sí            | Sí (isActive)          |
 | `/sessions/:sessionId`                | GET        | Obtener información de una sesión por ID    | Sí            | Sí (isActive, isAdmin) |
 | `/sessions/update-session/:sessionId` | PATCH      | Actualizar información de una sesión por ID | Sí            | Sí (isActive)          |
-| `/sessions/deactivate/:sessionId`     | PATCH      | Desactivar una sesión por ID                | Sí            | Sí (isActive)          |
+| `/sessions/delete/:sessionId`         | DELETE     | Desactivar una sesión por ID                | Sí            | Sí (isActive)          |
 | `/sessions/list`                      | GET        | Listar sesiones de un usuario               | Sí            | Sí (isActive)          |
 
 ### Usuarios
@@ -30,7 +30,7 @@ Este proyecto, denominado **Ink Addict Studio**, es una aplicación increíble q
 | `/users/profile`             | GET        | Obtener perfil de usuario    | Sí            | Sí (isActive)          |
 | `/users/update-profile`      | PATCH      | Actualizar perfil de usuario | Sí            | Sí (isActive)          |
 | `/users/change-role/:userId` | PATCH      | Cambiar rol de usuario       | Sí            | Sí (isActive, isAdmin) |
-| `/users/deactivate/:userId`  | PATCH      | Desactivar usuario           | Sí            | Sí (isActive)          |
+| `/users/deactivate/:userId`  | DELETE     | Desactivar usuario           | Sí            | Sí (isActive)          |
 | `/users/list/:role`          | GET        | Listar usuarios por rol      | Sí            | Sí (isActive, isAdmin) |
 
 ## Librerías y Dependencias

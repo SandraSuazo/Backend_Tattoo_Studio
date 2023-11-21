@@ -6,23 +6,32 @@ import {
   getSessionById,
 } from "../../core/helpers.js";
 
+/* Crear una cita */
 export const createSession = async (userId, newDate, next) => {
   const user = await getUserById(userId, next);
+
   const missingFields = registrationSession.filter((field) => !newDate[field]);
   if (missingFields.length > 1) {
     throw new Error(next("MISSING_REQUIRED_FIELDS"));
   }
-  if (user.role === "tattooArtist" && user._id === newDate.customer) {
-    throw new Error(next("INCOMPLETE_CREDENTIALS"));
+
+  if (
+    (user.role === "customer" && !newDate.tattooArtist) ||
+    (user.role === "tattooArtist" && !newDate.customer)
+  ) {
+    throw new Error(next("INVALID_SESSION_PARTICIPANTS"));
   }
+
   let customerField = user.role === "customer" ? userId : newDate.customer;
   let artistField =
     user.role === "tattooArtist" ? userId : newDate.tattooArtist;
+
   const formattedStartTime = formatTime(newDate.startTime, next);
   const formattedEndTime = formatTime(newDate.endTime, next);
-  if (!formattedStartTime || !formattedEndTime) {
-    throw new Error(next("INVALID_TIME_FORMAT"));
+  if (formattedStartTime > formattedEndTime) {
+    throw new Error(next("INVALID_TIME"));
   }
+
   const existingSession = await Session.findOne({
     date: newDate.date,
     startTime: { $lte: newDate.endTime },
@@ -31,75 +40,59 @@ export const createSession = async (userId, newDate, next) => {
   if (existingSession) {
     throw new Error(next("BUSY_SESSION"));
   }
+
   const currentDate = new Date();
   const selectedDate = new Date(newDate.date);
   if (selectedDate < currentDate) {
     throw new Error(next("INVALID_DATE"));
   }
+
   const session = new Session({
     ...newDate,
     startTime: formattedStartTime,
     endTime: formattedEndTime,
     customer: customerField,
     tattooArtist: artistField,
-    isActive: true,
   });
   await session.save();
+
   const fullSession = await getSessionById(session._id, next);
   return fullSession;
 };
 
+/* Listar todas las citas */
+export const listSession = async (userId, next) => {
+  const sessions = await Session.find({
+    $or: [{ customer: userId }, { tattooArtist: userId }],
+  });
+  if (sessions.length === 0) {
+    throw new Error(next("NO_PENDING_SESSIONS"));
+  }
+  return sessions;
+};
+
+/* Buscar una cita */
 export const findSession = async (sessionId, next) => {
   const session = await getSessionById(sessionId, next);
   return session;
 };
 
-export const updateSession = async (userId, sessionId, updatedData, next) => {
-  const user = await getUserById(userId, next);
-  const session = await getSessionById(sessionId, next);
-  session.isActive = false;
-  await createSession(userId, updatedData, next);
-  for (const field in updatedData) {
-    if (!registrationSession.includes(field)) {
-      throw new Error(next("ACCESS_DENIED"));
-    }
-    if (field === "startTime" || field === "endTime") {
-      const formattedTime = formatTime(updatedData[field], next);
-      if (!formattedTime) {
-        throw new Error(next("INVALID_TIME_FORMAT"));
-      }
-      session[field] = formattedTime;
-    } else {
-      session[field] = updatedData[field];
-    }
-  }
-  await session.save();
-  const updatedSession = await getSessionById(session._id, next);
-  return updatedSession;
+/* Modificar una cita */
+export const modifySession = async (userId, sessionId, updatedData, next) => {
+  await deleteSession(userId, sessionId, next);
+  const newSession = await createSession(userId, updatedData, next);
+  return newSession;
 };
 
-export const deactivateSession = async (userId, role, sessionId, next) => {
+/* Eliminar una cita */
+export const deleteSession = async (userId, sessionId, next) => {
   const session = await getSessionById(sessionId, next);
   if (
-    (role === "customer" && session.customer.toString() !== userId) ||
-    (role === "tattooArtist" && session.tattooArtist.toString() !== userId)
+    session.customer._id.toString() !== userId &&
+    session.tattooArtist._id.toString() !== userId
   ) {
     throw new Error(next("ACCESS_DENIED"));
   }
-  session.isActive = false;
-  await session.save();
-  return session;
-};
-
-export const listSession = async (userId, next) => {
-  const sessions = await Session.find({
-    $or: [{ customer: userId }, { tattooArtist: userId }],
-    isActive: true,
-  })
-    .populate("customer", "name surname phone")
-    .populate("tattooArtist", "name surname phone");
-  if (sessions.length === 0) {
-    throw new Error(next("NO_PENDING_SESSIONS"));
-  }
-  return sessions;
+  await Session.deleteOne({ _id: sessionId });
+  return "Session deleted successfully.";
 };

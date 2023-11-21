@@ -10,6 +10,7 @@ import {
   validatePassword,
 } from "../../core/helpers.js";
 
+/* Crear usuarios */
 export const createUser = async (newUser, next) => {
   const missingFields = registrationFields.filter((field) => !newUser[field]);
   if (missingFields.length > 0) {
@@ -29,6 +30,7 @@ export const createUser = async (newUser, next) => {
   return newUser;
 };
 
+/* Login usuarios */
 export const loginUser = async ({ email, password }, next) => {
   if (!email || !password) {
     throw new Error(next("INCOMPLETE_CREDENTIALS"));
@@ -51,6 +53,7 @@ export const loginUser = async ({ email, password }, next) => {
   return { token };
 };
 
+/* Perfil de un usuario */
 export const profileUser = async (userId, next) => {
   const user = await getUserById(userId, next);
   const userProfile = {};
@@ -60,29 +63,30 @@ export const profileUser = async (userId, next) => {
   return userProfile;
 };
 
+/* Actualizar datos de un usuario */
 export const updateProfile = async (userId, updatedData, next) => {
   const user = await getUserById(userId, next);
   let fieldModified = false;
-  const updatedUser = {};
+  const newDataUser = {};
   for (const field in updatedData) {
     if (!registrationFields.includes(field)) {
       throw new Error(next("ACCESS_DENIED"));
     }
     if (field === "email" && updatedData[field] !== undefined) {
-      validateEmail({ email: updatedData[field] }, next);
+      validateEmail(updatedData.email, next);
     }
     if (field === "password" && updatedData[field] !== undefined) {
-      validatePassword({ password: updatedData[field] }, next);
+      validatePassword(updatedData.password, next);
       const hashedPassword = await bcrypt.hash(
         updatedData["password"],
         CONFIG.HASH_ROUNDS
       );
       user.password = hashedPassword;
-      updatedUser["password"] = user.password;
+      newDataUser["password"] = user.password;
       fieldModified = true;
     } else if (updatedData[field] !== undefined) {
       user[field] = updatedData[field];
-      updatedUser[field] = user[field];
+      newDataUser[field] = user[field];
       fieldModified = true;
     }
   }
@@ -90,9 +94,10 @@ export const updateProfile = async (userId, updatedData, next) => {
     throw new Error(next("NO_FIELD_MODIFIED"));
   }
   await user.save();
-  return updatedUser;
+  return newDataUser;
 };
 
+/* Crear "admin" o "tattooArtist" */
 export const changeRole = async (userId, newRole, next) => {
   validateRole(newRole, next);
   const user = await getUserById(userId, next);
@@ -101,6 +106,7 @@ export const changeRole = async (userId, newRole, next) => {
   return user;
 };
 
+/* Desactivar usuarios */
 export const deactivateUser = async (userId, next) => {
   const user = await getUserById(userId, next);
   user.isActive = false;
@@ -108,6 +114,7 @@ export const deactivateUser = async (userId, next) => {
   return user;
 };
 
+/* Listar los usuarios según su rol */
 export const listUsers = async (role, next) => {
   validateRole(role, next);
   const users = await User.find({ role, isActive: true });

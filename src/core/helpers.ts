@@ -33,23 +33,21 @@ export const getUserById = async (userId, next) => {
 /* Función para verificar el formato del email */
 export const validateEmail = (email, next) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email.email)) {
+  if (!emailRegex.test(email)) {
     throw new Error(next("INVALID_EMAIL_FORMAT"));
   }
-  return true;
 };
 
 /* Fución para verificar el formato de la contraseña */
 export const validatePassword = (password, next) => {
   const passwordRegex =
     /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-  if (!passwordRegex.test(password.password)) {
+  if (!passwordRegex.test(password)) {
     throw new Error(next("INVALID_PASSWORD_FORMAT"));
   }
-  return true;
 };
 
-/* Función para comprobar si el role axiste y es valido */
+/* Función para comprobar si el role existe y es valido */
 export const validateRole = (role, next) => {
   const validRoles = ["admin", "customer", "tattooArtist"];
   if (!validRoles.includes(role)) {

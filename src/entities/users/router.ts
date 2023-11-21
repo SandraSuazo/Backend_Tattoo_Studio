@@ -12,9 +12,9 @@ import {
   listUsers,
 } from "./controllers.js";
 
-export const userRouter = express.Router();
+const router = express.Router();
 
-userRouter.post("/", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   const newUser = req.body;
   try {
     res.json(await createUser(newUser, next));
@@ -23,7 +23,7 @@ userRouter.post("/", async (req, res, next) => {
   }
 });
 
-userRouter.post("/login", async (req, res, next) => {
+router.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
   try {
     res.json(await loginUser({ email, password }, next));
@@ -32,7 +32,7 @@ userRouter.post("/login", async (req, res, next) => {
   }
 });
 
-userRouter.get("/profile", auth, isActive, async (req, res, next) => {
+router.get("/profile", auth, isActive, async (req, res, next) => {
   const userId = (req as any).user.userId;
   try {
     res.json(await profileUser(userId, next));
@@ -41,7 +41,7 @@ userRouter.get("/profile", auth, isActive, async (req, res, next) => {
   }
 });
 
-userRouter.patch("/update-profile", auth, isActive, async (req, res, next) => {
+router.patch("/update-profile", auth, isActive, async (req, res, next) => {
   const userId = (req as any).user.userId;
   const updatedData = req.body;
   try {
@@ -51,7 +51,7 @@ userRouter.patch("/update-profile", auth, isActive, async (req, res, next) => {
   }
 });
 
-userRouter.patch(
+router.patch(
   "/change-role/:userId",
   auth,
   isActive,
@@ -67,31 +67,22 @@ userRouter.patch(
   }
 );
 
-userRouter.patch(
-  "/deactivate/:userId",
-  auth,
-  isActive,
-  async (req, res, next) => {
-    const userId = req.params.userId;
-    try {
-      res.json(await deactivateUser(userId, next));
-    } catch (error) {
-      next("INTERNAL_SERVER_ERROR");
-    }
+router.delete("/deactivate/:userId", auth, isActive, async (req, res, next) => {
+  const userId = req.params.userId;
+  try {
+    res.json(await deactivateUser(userId, next));
+  } catch (error) {
+    next("INTERNAL_SERVER_ERROR");
   }
-);
+});
 
-userRouter.get(
-  "/list/:role",
-  auth,
-  isActive,
-  isAdmin,
-  async (req, res, next) => {
-    const role = req.params.role;
-    try {
-      res.json(await listUsers(role, next));
-    } catch (error) {
-      next("INTERNAL_SERVER_ERROR");
-    }
+router.get("/list/:role", auth, isActive, isAdmin, async (req, res, next) => {
+  const role = req.params.role;
+  try {
+    res.json(await listUsers(role, next));
+  } catch (error) {
+    next("INTERNAL_SERVER_ERROR");
   }
-);
+});
+
+export default router;

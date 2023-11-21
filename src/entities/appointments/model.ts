@@ -20,7 +20,6 @@ const sessionSchema = new Schema(
       ref: "User",
       required: true,
     },
-    isActive: { type: Boolean, required: true },
   },
 
   { versionKey: false, timestamps: true }
