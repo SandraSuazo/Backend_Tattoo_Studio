@@ -5,7 +5,6 @@ import { User } from "../entities/users/model.js";
 export const registrationFields = [
   "name",
   "surname",
-  "address",
   "phone",
   "email",
   "password",

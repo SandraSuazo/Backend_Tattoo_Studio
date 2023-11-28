@@ -44,7 +44,12 @@ export const loginUser = async ({ email, password }, next) => {
     throw new Error(next("INCORRECT_PASSWORD"));
   }
   const token = jwt.sign(
-    { userId: user._id, role: user.role, isActive: user.isActive },
+    {
+      userId: user._id,
+      name: user.name,
+      role: user.role,
+      isActive: user.isActive,
+    },
     CONFIG.SECRET,
     {
       expiresIn: "24h",

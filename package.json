@@ -1,7 +1,7 @@
 {
   "name": "ink_addict_studio",
   "version": "1.0.0",
-  "description": "Backend - Ink addict studio",
+  "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
