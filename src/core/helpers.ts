@@ -1,5 +1,6 @@
 import { Session } from "../entities/appointments/model.js";
 import { User } from "../entities/users/model.js";
+import { listUsers } from "../entities/users/controllers.js";
 
 /* Array de los campos requeridos a rellenar por el usuario */
 export const registrationFields = [
@@ -47,12 +48,18 @@ export const validatePassword = (password, next) => {
 };
 
 /* Función para comprobar si el role existe y es valido */
-export const validateRole = (role, next) => {
+export const validateRole = async (role, next) => {
   const validRoles = ["admin", "customer", "tattooArtist"];
   if (!validRoles.includes(role)) {
     throw new Error(next("INVALID_ROLE"));
   }
-  return role;
+  if (role === "tattooArtist") {
+    const tattooArtists = await listUsers("tattooArtist", next);
+    if (tattooArtists.length > 5) {
+      throw new Error(next("MAX_TATTOO_ARTISTS_REACHED"));
+    }
+    return role;
+  }
 };
 
 /* Función para verificar y transformar el formato de la hora en las citas */

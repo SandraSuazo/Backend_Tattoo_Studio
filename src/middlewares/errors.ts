@@ -8,6 +8,10 @@ const errorMessages = {
     code: 400,
     message: "Invalid session participants",
   },
+  MAX_TATTOO_ARTISTS_REACHED: {
+    code: 400,
+    message: "Max Tattoo Artist Reached",
+  },
   INCORRECT_PASSWORD: { code: 401, message: "Incorrect Password" },
   INVALID_PASSWORD_FORMAT: {
     code: 401,
