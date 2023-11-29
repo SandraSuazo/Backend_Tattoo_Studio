@@ -3,13 +3,7 @@ import { User } from "../entities/users/model.js";
 import { listUsers } from "../entities/users/controllers.js";
 
 /* Array de los campos requeridos a rellenar por el usuario */
-export const registrationFields = [
-  "name",
-  "surname",
-  "phone",
-  "email",
-  "password",
-];
+export const registrationFields = ["name", "surname", "email", "password"];
 
 /* Array de los campos requeridos a rellenar para crear una cita */
 export const registrationSession = [

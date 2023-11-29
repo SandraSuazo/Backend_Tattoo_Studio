@@ -55,7 +55,7 @@ export const loginUser = async ({ email, password }, next) => {
       expiresIn: "24h",
     }
   );
-  return { token };
+  return { token, user };
 };
 
 /* Perfil de un usuario */
