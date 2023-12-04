@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use("/user", userRouter);
-app.use("/session", sessionRouter);
+app.use("/appointment", sessionRouter);
 
 app.listen(CONFIG.PORT, () =>
   console.log(`Server listening on port ${CONFIG.PORT}`)

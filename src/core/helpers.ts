@@ -42,18 +42,12 @@ export const validatePassword = (password, next) => {
 };
 
 /* Función para comprobar si el role existe y es valido */
-export const validateRole = async (role, next) => {
+export const validateRole = (role, next) => {
   const validRoles = ["admin", "customer", "tattooArtist"];
   if (!validRoles.includes(role)) {
     throw new Error(next("INVALID_ROLE"));
   }
-  if (role === "tattooArtist") {
-    const tattooArtists = await listUsers("tattooArtist", next);
-    if (tattooArtists.length > 5) {
-      throw new Error(next("MAX_TATTOO_ARTISTS_REACHED"));
-    }
-    return role;
-  }
+  return role;
 };
 
 /* Función para verificar y transformar el formato de la hora en las citas */
@@ -73,8 +67,8 @@ export const formatTime = (timeString, next) => {
 /* Función para buscar una cita por su Id y comprobar que existe */
 export const getSessionById = async (sessionId, next) => {
   const session = await Session.findById(sessionId)
-    .populate("customer", "name surname phone")
-    .populate("tattooArtist", "name surname phone");
+    .populate("customer", "name surname")
+    .populate("tattooArtist", "name surname");
   if (!session) {
     throw new Error(next("SESSION_NOT_FOUND"));
   }
