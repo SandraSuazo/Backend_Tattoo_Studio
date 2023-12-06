@@ -64,10 +64,7 @@ export const createSession = async (userId, newDate, next) => {
 export const listSession = async (userId, next) => {
   const sessions = await Session.find({
     $or: [{ customer: userId }, { tattooArtist: userId }],
-  });
-  if (sessions.length === 0) {
-    throw new Error(next("NO_PENDING_SESSIONS"));
-  }
+  }).populate("tattooArtist", "name surname");
   return sessions;
 };
 

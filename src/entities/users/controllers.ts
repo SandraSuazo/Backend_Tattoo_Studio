@@ -73,6 +73,9 @@ export const updateProfile = async (userId, updatedData, next) => {
   let fieldModified = false;
   const newDataUser = {};
   for (const field in updatedData) {
+    if (!registrationFields.includes(field)) {
+      throw new Error(next("ACCESS_DENIED"));
+    }
     if (field === "email" && updatedData[field] !== undefined) {
       validateEmail(updatedData.email, next);
     }

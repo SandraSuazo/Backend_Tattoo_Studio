@@ -33,7 +33,6 @@ const errorMessages = {
   BUSY_SESSION: { code: 403, message: "Busy session" },
   USER_NOT_FOUND: { code: 404, message: "User not found" },
   SESSION_NOT_FOUND: { code: 404, message: "Session not found" },
-  NO_PENDING_SESSIONS: { code: 404, message: "You have no pending sessions" },
   USER_ALREADY_EXISTS: { code: 422, message: "User already exists" },
   INTERNAL_SERVER_ERROR: { code: 500, message: "Internal Server Error" },
 };
