@@ -51,15 +51,21 @@ router.patch("/update-profile", auth, isActive, async (req, res, next) => {
   }
 });
 
-router.delete("/deactivate/:userId", auth, isActive, async (req, res, next) => {
-  const userId = req.params.userId;
-  console.log("Deleting user with ID:", userId);
-  try {
-    res.json(await deactivateUser(userId, next));
-  } catch (error) {
-    next("INTERNAL_SERVER_ERROR");
+router.delete(
+  "/deactivate/:userId",
+  auth,
+  isActive,
+  isAdmin,
+  async (req, res, next) => {
+    const userId = req.params.userId;
+    console.log("Deleting user with ID:", userId);
+    try {
+      res.json(await deactivateUser(userId, next));
+    } catch (error) {
+      next("INTERNAL_SERVER_ERROR");
+    }
   }
-});
+);
 
 router.patch(
   "/change-role/:userId",

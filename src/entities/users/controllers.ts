@@ -39,6 +39,9 @@ export const loginUser = async ({ email, password }, next) => {
   if (!user) {
     throw new Error(next("USER_NOT_FOUND"));
   }
+  if (user.isActive === false) {
+    throw new Error(next("DISABLED_USER"));
+  }
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     throw new Error(next("INCORRECT_PASSWORD"));
