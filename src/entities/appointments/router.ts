@@ -8,6 +8,7 @@ import {
   deleteSession,
   findSession,
   modifySession,
+  listAllSessions,
 } from "./controllers.js";
 
 const router = express.Router();
@@ -30,6 +31,20 @@ router.get("/list", auth, isActive, async (req, res, next) => {
     next("INTERNAL_SERVER_ERROR");
   }
 });
+
+router.get(
+  "/list-all-appointment",
+  auth,
+  isActive,
+  isAdmin,
+  async (req, res, next) => {
+    try {
+      res.json(await listAllSessions(next));
+    } catch (error) {
+      next("INTERNAL_SERVER_ERROR");
+    }
+  }
+);
 
 router.get("/:sessionId", auth, isActive, isAdmin, async (req, res, next) => {
   const sessionId = req.params.sessionId;

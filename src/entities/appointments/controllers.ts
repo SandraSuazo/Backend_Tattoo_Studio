@@ -60,11 +60,19 @@ export const createSession = async (userId, newDate, next) => {
   return fullSession;
 };
 
-/* Listar todas las citas */
+/* Listar todas las citas propias */
 export const listSession = async (userId, next) => {
   const sessions = await Session.find({
     $or: [{ customer: userId }, { tattooArtist: userId }],
   }).populate("tattooArtist", "name surname");
+  return sessions;
+};
+
+/* Listar todas las citas de los usuarios */
+export const listAllSessions = async (next) => {
+  const sessions = await Session.find()
+    .populate("customer", "name surname")
+    .populate("tattooArtist", "name surname");
   return sessions;
 };
 

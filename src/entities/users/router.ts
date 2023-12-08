@@ -58,7 +58,6 @@ router.delete(
   isAdmin,
   async (req, res, next) => {
     const userId = req.params.userId;
-    console.log("Deleting user with ID:", userId);
     try {
       res.json(await deactivateUser(userId, next));
     } catch (error) {
