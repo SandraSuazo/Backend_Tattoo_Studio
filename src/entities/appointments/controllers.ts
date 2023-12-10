@@ -69,10 +69,13 @@ export const listSession = async (userId, next) => {
 };
 
 /* Listar todas las citas de los usuarios */
-export const listAllSessions = async (next) => {
+export const listAllSessions = async (page, pageSize, next) => {
+  const skip = (page - 1) * pageSize;
   const sessions = await Session.find()
     .populate("customer", "name surname")
-    .populate("tattooArtist", "name surname");
+    .populate("tattooArtist", "name surname")
+    .skip(skip)
+    .limit(pageSize);
   return sessions;
 };
 

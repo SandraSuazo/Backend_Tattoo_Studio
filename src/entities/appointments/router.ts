@@ -33,13 +33,15 @@ router.get("/list", auth, isActive, async (req, res, next) => {
 });
 
 router.get(
-  "/list-all-appointment",
+  "/list-all-appointments",
   auth,
   isActive,
   isAdmin,
   async (req, res, next) => {
+    const page = req.query.page as any;
+    const pageSize = req.query.pageSize as any;
     try {
-      res.json(await listAllSessions(next));
+      res.json(await listAllSessions(page, pageSize, next));
     } catch (error) {
       next("INTERNAL_SERVER_ERROR");
     }
