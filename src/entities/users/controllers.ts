@@ -9,6 +9,7 @@ import {
   validateEmail,
   validatePassword,
 } from "../../core/helpers.js";
+import { deleteSession, listAllSessions } from "../appointments/controllers.js";
 
 /* Crear usuarios */
 export const createUser = async (newUser, next) => {
@@ -116,6 +117,13 @@ export const changeRole = async (userId, newRole, next) => {
 /* Desactivar usuarios */
 export const deactivateUser = async (userId, next) => {
   const user = await getUserById(userId, next);
+  const sessions = await listAllSessions(1, 999999, next);
+  const userSessions = sessions.filter(
+    (session) => session.customer._id.toString() === userId
+  );
+  for (const session of userSessions) {
+    await deleteSession(userId, session._id, next);
+  }
   user.isActive = false;
   await user.save();
   return user;
